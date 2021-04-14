@@ -31,6 +31,7 @@ bibs = $(srcdir)/riscv-spec.bib
 # You shouldn't need to change anything below this
 #=======================================================================
 
+HTLATEX := TEXINPUTS=$(srcdir): htlatex
 PDFLATEX := TEXINPUTS=$(srcdir): pdflatex -interaction=nonstopmode -halt-on-error
 BIBTEX := BIBINPUTS=$(srcdir): bibtex
 
@@ -60,6 +61,23 @@ $(pdfs_without_bib): %.pdf: $(srcdir)/%.tex $(srcs) $(figs)
 	$(PDFLATEX) $*
 
 junk += $(pdfs) *.aux *.log *.bbl *.blg *.toc *.out
+
+#------------------------------------------------------------
+# HTML
+
+htmls = riscv-spec.html
+xbbs = $(patsubst %.pdf,%.xbb,$(filter-out %.pdf_t,$(figs)))
+
+html: $(htmls)
+.PHONY: html
+
+%.xbb: %.pdf
+	cd $(dir $<) && ebb -x $(notdir $<)
+
+%.html: $(srcdir)/%.tex $(srcs) $(figs) $(xbbs)
+	$(HTLATEX) $<
+
+junk += $(htmls) $(xbbs) *.4ct *.4tc *.aux *.log *.bbl *.blg *.toc *.out *.tmp *.lg *.idv *.dvi *.xref *.xbb *.png *.css
 
 #------------------------------------------------------------
 # Other Targets
